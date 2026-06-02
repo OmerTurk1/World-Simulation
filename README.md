@@ -26,11 +26,8 @@ WorldSim is a simple world map and population simulation project built with Pyth
 - SciPy
 
 ## Installation
-1. Open the project folder:
+1. Open the project folder.
 
-```bash
-cd "c:\Python Çalışmalarım\WorldSim"
-```
 
 2. Install the required packages:
 
