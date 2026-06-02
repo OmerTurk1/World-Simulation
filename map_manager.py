@@ -1,46 +1,60 @@
 import pygame
 import random
+import numpy as np  # NumPy kütüphanesini ekledik
 
 class MapManager:
     def __init__(self, image_path, target_size=(800, 800)):
-        # Haritayı yükle ve anında hedef boyuta ölçekle
         raw_image = pygame.image.load(image_path)
         self.bg_image = pygame.transform.scale(raw_image, target_size)
         
-        # Artık width ve height 800 olacak
         self.width = self.bg_image.get_width()
         self.height = self.bg_image.get_height()
         
         self.depleted_food = {} 
 
+        # 0: unwalkable (Deniz, Kar vb.), 1: Walkable, 2: Food (Orman/Çimen)
+        self.grid = np.zeros((self.width, self.height), dtype=np.uint8)
+        self._initialize_grid()
+
+    def _initialize_grid(self):
+        non_walkable_colors = {
+            (0, 0, 139),       # Deep Blue (Sea)
+            (65, 105, 225),    # Sky Blue (Shallow Water)
+            (105, 105, 105),   # Dark Gray (High Mountain)
+            (255, 255, 255)    # White (Peak Snow)
+        }
+
+        for x in range(self.width):
+            for y in range(self.height):
+                color = self.bg_image.get_at((x, y))
+                r, g, b = color.r, color.g, color.b
+
+                if (r, g, b) in non_walkable_colors:
+                    self.grid[x, y] = 0  # non-walkable area
+                else:
+                    if g > r and g > b:
+                        self.grid[x, y] = 2  # foody
+                    else:
+                        self.grid[x, y] = 1  # walkable
+
     def is_walkable(self, x, y):
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return False
-            
-        color = self.bg_image.get_at((x, y))
-        r, g, b = color.r, color.g, color.b
-        
-        # Deniz kontrolü (Mavi tonlar)
-        if b > r and b > g: 
-            return False
-            
-        # Dağ ve Karlı Zirve kontrolü (Gri/Beyaz tonlar)
-        if abs(r - g) < 20 and abs(g - b) < 20 and r > 100: 
-            return False
-            
-        return True
+
+        return self.grid[x, y] != 0
 
     def has_food(self, x, y):
-        color = self.bg_image.get_at((x, y))
-        r, g, b = color.r, color.g, color.b
-        
-        if g > r and g > b:
+        if x < 0 or x >= self.width or y < 0 or y >= self.height:
+            return False
+
+        # Matriste değeri 2 (Yemek) ise ve daha önce tükenmediyse
+        if self.grid[x, y] == 2:
             if (x, y) not in self.depleted_food:
                 return True
         return False
 
     def consume_food(self, x, y):
-        self.depleted_food[(x, y)] = 300 
+        self.depleted_food[(x, y)] = 150
 
     def update_food(self):
         to_remove = []
@@ -56,7 +70,7 @@ class MapManager:
         while True:
             x = random.randint(0, self.width - 1)
             y = random.randint(0, self.height - 1)
-            if self.is_walkable(x, y):
+            if self.grid[x, y] != 0:
                 return x, y
             
     def get_walkable_pos_near(self, center_x, center_y, radius=30):

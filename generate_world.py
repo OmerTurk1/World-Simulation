@@ -48,14 +48,14 @@ def generate_and_save_world(map_size=1000, res=6, octaves=10, worlds_folder='wor
     terrain_ids = np.digitize(elevation, bins=thresholds)
 
     colors = np.array([
-        [0, 0, 139],       
-        [65, 105, 225],    
-        [238, 214, 175],   
-        [34, 139, 34],     
-        [0, 100, 0],       
-        [139, 137, 137],   
-        [105, 105, 105],   
-        [255, 255, 255]    
+        (0, 0, 139),       # Deep Blue (Sea)
+        (65, 105, 225),    # Sky Blue (Shallow Water)
+        (238, 214, 175),   # Sand
+        (34, 139, 34),     # Green (Grassland)
+        (0, 100, 0),       # Dark Green (Forest)
+        (139, 137, 137),   # Gray (Mount)
+        (105, 105, 105),   # Dark Gray (High Mountain)
+        (255, 255, 255)    # White (Peak Snow)
     ], dtype=np.uint8)
 
     image_data = colors[terrain_ids]

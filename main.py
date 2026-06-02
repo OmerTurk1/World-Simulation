@@ -13,16 +13,16 @@ NATIONS = [
     {"name": "Pink", "color": (255, 105, 180)}
 ]
 
-def main(map_path, data_path):
+def main(world_path, data_path):
     pygame.init()
     history = []
     
     screen_size = (800, 800)
     
     try:
-        map_manager = MapManager(map_path, target_size=screen_size)
+        map_manager = MapManager(world_path, target_size=screen_size)
     except FileNotFoundError:
-        print(f"Error: {map_path} not found. Please check the file path.")
+        print(f"Error: {world_path} not found. Please check the file path.")
         return
         
     screen = pygame.display.set_mode(screen_size)
@@ -44,6 +44,12 @@ def main(map_path, data_path):
     font = pygame.font.SysFont("Arial", 18, bold=True)
     
     while running:
+        # daily record dictionary to save in history
+        day_record = {
+            "Day": day,
+            "Total": len(agents)
+        }
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -54,7 +60,9 @@ def main(map_path, data_path):
         for agent in agents:
             agent.update(map_manager, new_agents)
         
+        day_record["Birth"] = new_agents.__len__()
         agents.extend(new_agents)
+        day_record["Death"] = [a for a in agents if not a.alive].__len__()
         agents = [a for a in agents if a.alive]
 
         screen.blit(map_manager.bg_image, (0, 0))
@@ -64,12 +72,6 @@ def main(map_path, data_path):
 
         # How many agents of each nation are there?
         color_counts = Counter([agent.color for agent in agents])
-        
-        # daily record dictionary to save in history
-        day_record = {
-            "Day": day,
-            "Total": len(agents)
-        }
         
         # UI and Daily Record Collection
         y_offset = 15
@@ -100,21 +102,21 @@ def main(map_path, data_path):
     # CSV file writing
     with open(data_path, "w", encoding="utf-8") as f:
         # Headers
-        headers = ["Day", "Total"] + [nation["name"] for nation in NATIONS]
+        headers = ["Day", "Total", "Birth", "Death"] + [nation["name"] for nation in NATIONS]
         f.write(",".join(headers) + "\n")
         
         # Write the data rows
         for record in history:
-            row_data = [str(record["Day"]), str(record["Total"])]
+            row_data = [str(record["Day"]), str(record["Total"]), str(record["Birth"]), str(record["Death"])]
             for nation in NATIONS:
                 row_data.append(str(record[nation["name"]]))
             f.write(",".join(row_data) + "\n")
-            
+
     end_time = time.time()
     print(f"Simulation completed. Data saved to {data_path}.")
     print(f"Total simulation time: {end_time - start_time:.2f} seconds.")
 
 if __name__ == "__main__":
-    map_path = "worlds/world_map_s=1000_r=6_o=10.png"
+    world_path = "worlds/single_land_map.png"
     data_path = "data/population_data.csv" 
-    main(map_path, data_path)
+    main(world_path, data_path)
