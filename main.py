@@ -1,0 +1,123 @@
+import pygame
+import time
+from collections import Counter
+from map_manager import MapManager
+from agent import Agent
+
+NATIONS = [
+    {"name": "Red", "color": (255, 0, 0)},
+    {"name": "Blue",    "color": (0, 100, 255)}, 
+    {"name": "Yellow",    "color": (255, 255, 0)},
+    {"name": "Purple",     "color": (128, 0, 128)},
+    {"name": "Orange", "color": (255, 165, 0)},
+    {"name": "Pink",   "color": (255, 105, 180)}
+]
+
+def main(map_path, data_path):
+    pygame.init()
+    history = []
+    
+    screen_size = (800, 800)
+    
+    try:
+        map_manager = MapManager(map_path, target_size=screen_size)
+    except FileNotFoundError:
+        print(f"Hata: {map_path} bulunamadı. Lütfen dosya yolunu kontrol et.")
+        return
+        
+    screen = pygame.display.set_mode(screen_size)
+    pygame.display.set_caption("Dünya Simülasyonu")
+    clock = pygame.time.Clock()
+
+    agents = []
+    person_per_nation = 10
+    for nation in NATIONS:
+        start_x, start_y = map_manager.get_random_walkable_pos()
+        for _ in range(person_per_nation):
+            x, y = map_manager.get_walkable_pos_near(start_x, start_y, radius=20)
+            agents.append(Agent(x, y, nation["color"]))
+
+    running = True
+    day = 1
+    start_time = time.time()
+    
+    # Yazı fontu önceden yüklenir (Optimizasyon için döngü dışına alındı)
+    font = pygame.font.SysFont("Arial", 18, bold=True)
+    
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        map_manager.update_food()
+        
+        new_agents = []
+        for agent in agents:
+            agent.update(map_manager, new_agents)
+        
+        agents.extend(new_agents)
+        agents = [a for a in agents if a.alive]
+
+        screen.blit(map_manager.bg_image, (0, 0))
+        
+        for agent in agents:
+            agent.draw(screen)
+
+        # Hangi milletten kaç kişi var sayıyoruz
+        color_counts = Counter([agent.color for agent in agents])
+        
+        # Tarihçeye kaydetmek için günlük sözlük (dictionary) oluşturuyoruz
+        day_record = {
+            "Day": day,
+            "Total": len(agents)
+        }
+        
+        # UI (Arayüz) Çizimi ve Günlük Kayıt Toplama
+        y_offset = 15
+        day_text = font.render(f"Gün: {day} | Toplam Nüfus: {len(agents)}", True, (255, 255, 255))
+        screen.blit(day_text, (15, y_offset))
+        y_offset += 25
+
+        for nation in NATIONS:
+            # Renge göre sayıyı al
+            count = color_counts.get(nation["color"], 0)
+            
+            # Sözlüğe (CSV için) milleti ve sayısını ekle
+            day_record[nation["name"]] = count 
+            
+            # Ekrana milletin rengiyle yazdır
+            text = font.render(f"{nation['name']}: {count}", True, nation["color"])
+            shadow = font.render(f"{nation['name']}: {count}", True, (0, 0, 0))
+            screen.blit(shadow, (16, y_offset + 1))
+            screen.blit(text, (15, y_offset))
+            y_offset += 20
+            
+        history.append(day_record)
+
+        pygame.display.flip()
+        clock.tick(60)
+        day += 1
+
+    pygame.quit()
+    
+    # CSV Dosyasına Yazdırma İşlemi
+    with open(data_path, "w", encoding="utf-8") as f:
+        # Başlıkları (Header) oluştur
+        headers = ["Day", "Total"] + [nation["name"] for nation in NATIONS]
+        f.write(",".join(headers) + "\n")
+        
+        # Verileri virgülle ayırarak yazdır
+        for record in history:
+            row_data = [str(record["Day"]), str(record["Total"])]
+            for nation in NATIONS:
+                row_data.append(str(record[nation["name"]]))
+            f.write(",".join(row_data) + "\n")
+            
+    end_time = time.time()
+    print(f"Simülasyon tamamlandı. Veriler {data_path} dosyasına kaydedildi.")
+    print(f"Toplam simülasyon süresi: {end_time - start_time:.2f} saniye.")
+
+if __name__ == "__main__":
+    map_path = "worlds/world_map_s=1000_r=6_o=10.png"
+    data_path = "data/population_data.csv" 
+    main(map_path, data_path)

@@ -1,0 +1,7 @@
+pygame
+random
+numpy
+matplotlib
+Pillow
+pandas
+scipy
