@@ -32,11 +32,11 @@ WorldSim is a simple world map and population simulation project built with Pyth
 2. Install the required packages:
 
 ```bash
-pip install pygame numpy matplotlib scipy
+pip install -r requirements.txt
 ```
 
 ## How to Run
-1. First generate a world map:
+1. First generate a world map(There is already some samples, just run this script if you want your own world):
 
 ```bash
 python generate_world.py

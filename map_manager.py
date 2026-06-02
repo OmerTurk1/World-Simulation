@@ -2,7 +2,6 @@ import pygame
 import random
 
 class MapManager:
-    # target_size eklendi
     def __init__(self, image_path, target_size=(800, 800)):
         # Haritayı yükle ve anında hedef boyuta ölçekle
         raw_image = pygame.image.load(image_path)

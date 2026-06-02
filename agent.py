@@ -2,6 +2,7 @@ import pygame
 import random
 
 class Agent:
+    move_range = 3
 
     def __init__(self, x, y, color):
         self.x = x
@@ -23,9 +24,8 @@ class Agent:
             self.alive = False
             return
 
-        # Hareket sistemi organikleştirildi
-        dx = random.randint(-2, 2)
-        dy = random.randint(-2, 2)
+        dx = random.randint(-Agent.move_range, Agent.move_range)
+        dy = random.randint(-Agent.move_range, Agent.move_range)
         new_x, new_y = self.x + dx, self.y + dy
 
         if map_manager.is_walkable(new_x, new_y):
@@ -39,7 +39,7 @@ class Agent:
 
         if self.energy > 160:
             self.energy -= 100
-            # Yeni doğan bebek hafifçe farklı bir pikselde doğsun ki üst üste binmesinler
+
             spawn_x = self.x + random.choice([-1, 1])
             spawn_y = self.y + random.choice([-1, 1])
             

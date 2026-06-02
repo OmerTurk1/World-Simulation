@@ -1,5 +1,4 @@
 pygame
-random
 numpy
 matplotlib
 Pillow

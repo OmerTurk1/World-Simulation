@@ -6,11 +6,11 @@ from agent import Agent
 
 NATIONS = [
     {"name": "Red", "color": (255, 0, 0)},
-    {"name": "Blue",    "color": (0, 100, 255)}, 
-    {"name": "Yellow",    "color": (255, 255, 0)},
-    {"name": "Purple",     "color": (128, 0, 128)},
+    {"name": "Blue", "color": (0, 100, 255)}, 
+    {"name": "Yellow", "color": (255, 255, 0)},
+    {"name": "Purple", "color": (128, 0, 128)},
     {"name": "Orange", "color": (255, 165, 0)},
-    {"name": "Pink",   "color": (255, 105, 180)}
+    {"name": "Pink", "color": (255, 105, 180)}
 ]
 
 def main(map_path, data_path):
@@ -22,11 +22,11 @@ def main(map_path, data_path):
     try:
         map_manager = MapManager(map_path, target_size=screen_size)
     except FileNotFoundError:
-        print(f"Hata: {map_path} bulunamadı. Lütfen dosya yolunu kontrol et.")
+        print(f"Error: {map_path} not found. Please check the file path.")
         return
         
     screen = pygame.display.set_mode(screen_size)
-    pygame.display.set_caption("Dünya Simülasyonu")
+    pygame.display.set_caption("World Simulation")
     clock = pygame.time.Clock()
 
     agents = []
@@ -41,7 +41,6 @@ def main(map_path, data_path):
     day = 1
     start_time = time.time()
     
-    # Yazı fontu önceden yüklenir (Optimizasyon için döngü dışına alındı)
     font = pygame.font.SysFont("Arial", 18, bold=True)
     
     while running:
@@ -63,29 +62,27 @@ def main(map_path, data_path):
         for agent in agents:
             agent.draw(screen)
 
-        # Hangi milletten kaç kişi var sayıyoruz
+        # How many agents of each nation are there?
         color_counts = Counter([agent.color for agent in agents])
         
-        # Tarihçeye kaydetmek için günlük sözlük (dictionary) oluşturuyoruz
+        # daily record dictionary to save in history
         day_record = {
             "Day": day,
             "Total": len(agents)
         }
         
-        # UI (Arayüz) Çizimi ve Günlük Kayıt Toplama
+        # UI and Daily Record Collection
         y_offset = 15
-        day_text = font.render(f"Gün: {day} | Toplam Nüfus: {len(agents)}", True, (255, 255, 255))
+        day_text = font.render(f"Day: {day} | Total Population: {len(agents)}", True, (255, 255, 255))
         screen.blit(day_text, (15, y_offset))
         y_offset += 25
 
         for nation in NATIONS:
-            # Renge göre sayıyı al
+            # Count the number of agents for the current nation
             count = color_counts.get(nation["color"], 0)
-            
-            # Sözlüğe (CSV için) milleti ve sayısını ekle
             day_record[nation["name"]] = count 
             
-            # Ekrana milletin rengiyle yazdır
+            # Print the nation name and count in the nation's color with a shadow for better visibility
             text = font.render(f"{nation['name']}: {count}", True, nation["color"])
             shadow = font.render(f"{nation['name']}: {count}", True, (0, 0, 0))
             screen.blit(shadow, (16, y_offset + 1))
@@ -100,13 +97,13 @@ def main(map_path, data_path):
 
     pygame.quit()
     
-    # CSV Dosyasına Yazdırma İşlemi
+    # CSV file writing
     with open(data_path, "w", encoding="utf-8") as f:
-        # Başlıkları (Header) oluştur
+        # Headers
         headers = ["Day", "Total"] + [nation["name"] for nation in NATIONS]
         f.write(",".join(headers) + "\n")
         
-        # Verileri virgülle ayırarak yazdır
+        # Write the data rows
         for record in history:
             row_data = [str(record["Day"]), str(record["Total"])]
             for nation in NATIONS:
@@ -114,8 +111,8 @@ def main(map_path, data_path):
             f.write(",".join(row_data) + "\n")
             
     end_time = time.time()
-    print(f"Simülasyon tamamlandı. Veriler {data_path} dosyasına kaydedildi.")
-    print(f"Toplam simülasyon süresi: {end_time - start_time:.2f} saniye.")
+    print(f"Simulation completed. Data saved to {data_path}.")
+    print(f"Total simulation time: {end_time - start_time:.2f} seconds.")
 
 if __name__ == "__main__":
     map_path = "worlds/world_map_s=1000_r=6_o=10.png"
