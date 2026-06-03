@@ -5,24 +5,23 @@ from scipy.ndimage import zoom
 
 def generate_and_save_world(map_size=1000, res=6, octaves=10, worlds_folder='worlds'):
     """
-    Numpy ve Scipy kullanarak fraktal gürültü tabanlı bir dünya haritası üretir
-    ve bunu pikselleri net kalacak şekilde PNG formatında kaydeder.
+    Using Numpy and Scipy, it generates a fractal noise-based world map
+    and saves it in PNG format with clear pixels.
 
-    Parametreler:
+    Parameters:
     ----------
-    map_size : int, varsayılan 1000
-        Üretilecek haritanın piksel cinsinden genişlik ve yükseklik boyutu (Örn: 1000x1000).
-    res : int, varsayılan 6
-        Başlangıç ızgara (grid) çözünürlüğü. Değer büyüdükçe haritadaki ana kara ve ada sayısı artar.
-    octaves : int, varsayılan 10
-        Fraktal detay katmanı sayısı. Değer büyüdükçe kıyı çizgileri ve dağlar daha girintili çıkıntılı olur.
-    worlds_folder : str, varsayılan 'worlds'
-        Görüntünün kaydedileceği hedef klasör adı. Klasör yoksa otomatik oluşturulur.
+    map_size : int
+        Pixel width and height of the generated world map (e.g., 1000 for a 1000x1000 map).
+    res : int
+        Initial grid resolution for the noise. Higher values create more landmasses and islands.
+    octaves : int
+        fractal noise layer amount. Higher values create more detailed coastlines and mountains.
+    worlds_folder : str
+        target folder for saving the image. If it doesn't exist, it will be created.
 
-    Döndürdüğü Değer:
+    Returns:
     -------
-    str
-        Kaydedilen harita dosyasının tam yolu ve adı.
+    str: Absolute path of the saved map file.
     """
     os.makedirs(worlds_folder, exist_ok=True)
     
@@ -71,7 +70,6 @@ def generate_and_save_world(map_size=1000, res=6, octaves=10, worlds_folder='wor
 
     return img_name
 
-# --- ÖRNEK KULLANIM ---
 if __name__ == "__main__":
     saved_path = generate_and_save_world(map_size=1000, res=6, octaves=10)
-    print(f"Dosya şuraya kaydedildi: {saved_path}")
+    print(f"File saved to: {saved_path}")

@@ -1,18 +1,20 @@
 import pygame
 import random
-import numpy as np  # NumPy kütüphanesini ekledik
+import numpy as np
 
 class MapManager:
-    def __init__(self, image_path, target_size=(800, 800)):
+    def __init__(self, image_path, target_size=(800, 800), chunk_size=50):
         raw_image = pygame.image.load(image_path)
         self.bg_image = pygame.transform.scale(raw_image, target_size)
         
         self.width = self.bg_image.get_width()
         self.height = self.bg_image.get_height()
         
-        self.depleted_food = {} 
+        self.depleted_food = {}
+        self.chunk_size = chunk_size
+        self.chunk_owners = {} # {(cx, cy): color}
 
-        # 0: unwalkable (Deniz, Kar vb.), 1: Walkable, 2: Food (Orman/Çimen)
+        # 0: unwalkable (Sea, Peak Snow vb.), 1: Walkable, 2: Food (Forest/Grass)
         self.grid = np.zeros((self.width, self.height), dtype=np.uint8)
         self._initialize_grid()
 
@@ -37,6 +39,18 @@ class MapManager:
                     else:
                         self.grid[x, y] = 1  # walkable
 
+    def get_chunk(self, x, y):
+        return x // self.chunk_size, y // self.chunk_size
+
+    def get_chunk_owner(self, cx, cy):
+        return self.chunk_owners.get((cx, cy), None)
+
+    def set_chunk_owner(self, cx, cy, color):
+        if color is None:
+            self.chunk_owners.pop((cx, cy), None)
+        else:
+            self.chunk_owners[(cx, cy)] = color
+    
     def is_walkable(self, x, y):
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return False
@@ -47,7 +61,6 @@ class MapManager:
         if x < 0 or x >= self.width or y < 0 or y >= self.height:
             return False
 
-        # Matriste değeri 2 (Yemek) ise ve daha önce tükenmediyse
         if self.grid[x, y] == 2:
             if (x, y) not in self.depleted_food:
                 return True

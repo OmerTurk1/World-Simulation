@@ -33,11 +33,15 @@ class Agent:
         if map_manager.is_walkable(new_x, new_y):
             self.x, self.y = new_x, new_y
 
-        if map_manager.has_food(self.x, self.y):
+        cx, cy = map_manager.get_chunk(self.x, self.y)
+        chunk_owner = map_manager.get_chunk_owner(cx, cy)
+
+        can_eat = (chunk_owner is None) or (chunk_owner == self.color)
+        if can_eat and map_manager.has_food(self.x, self.y):
             self.energy += 10
             map_manager.consume_food(self.x, self.y) 
             if self.energy > 200:
-                self.energy = 200 
+                self.energy = 200
 
         if self.energy > 160 and self.reproduce_cooldown <= 0: # reproduction
             self.energy -= 120
