@@ -14,7 +14,7 @@ class Agent:
         self.color = color
         self.reproduce_cooldown = 0
 
-    def update(self, map_manager, new_agents_list):
+    def update(self, map_manager, nation_state, new_agents_list):
         if not self.alive:
             return
 
@@ -39,13 +39,19 @@ class Agent:
         can_eat = (chunk_owner is None) or (chunk_owner == self.color)
         if can_eat and map_manager.has_food(self.x, self.y):
             self.energy += 10
-            map_manager.consume_food(self.x, self.y) 
+            map_manager.consume_food(self.x, self.y)
             if self.energy > 200:
                 self.energy = 200
 
-        if self.energy > 160 and self.reproduce_cooldown <= 0: # reproduction
+        if map_manager.can_gather_resource(self.x, self.y):
+            resource = map_manager.gather_resource(self.x, self.y)
+            if resource is not None:
+                nation_state.add_resource(resource, 1)
+
+        want_to_reproduce = random.random() > 0.5
+        if want_to_reproduce and self.energy > 160 and self.reproduce_cooldown <= 0:
             self.energy -= 120
-            self.reproduce_cooldown = 10  # Set cooldown period
+            self.reproduce_cooldown = 10
 
             spawn_x = self.x + random.choice([-1, 1])
             spawn_y = self.y + random.choice([-1, 1])

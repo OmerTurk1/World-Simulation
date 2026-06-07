@@ -3,6 +3,8 @@
 ## About
 WorldSim is a simple world map and population simulation project built with Python. The project simulates agents that walk, eat, and reproduce on a randomly generated terrain map. When the simulation ends, daily population data is stored in `data/population_data.csv`.
 
+Agents' nation can own land, and they are not able to feed on other nations' chunks. Uncolonized chunks are allowed for usage by anyone.
+
 ## Key Features
 - World map generation using fractal noise (`generate_world.py`)
 - Walkable surface and food source detection on the map (`map_manager.py`)
@@ -12,11 +14,30 @@ WorldSim is a simple world map and population simulation project built with Pyth
 
 ## Project Structure
 - `main.py`: Starts the simulation loop, creates agents, renders the simulation with Pygame, and saves results to CSV.
+- `config.py`: Global parameters such as `NATIONS` are taken from here.
 - `generate_world.py`: Generates a world map based on input parameters and saves a PNG file to the `worlds/` folder.
 - `map_manager.py`: Manages map loading, walkability checks, food state, and random position selection.
 - `agent.py`: Defines agent behavior including position, energy, age, movement, and reproduction.
 - `data/`: Contains simulation output files.
 - `worlds/`: Contains generated map images.
+
+```bash
+.
+├── agent.py
+├── config.py
+├── data/
+│   ├── population_data.csv
+│   └── population_trend.png
+├── data_analysis.py
+├── generate_world.py
+├── main.py
+├── map_manager.py
+├── requirements.txt
+└── worlds/
+    ├── og_map.png
+    ├── single_land_map.png
+    └── world_map_pure__s=1000.png
+```
 
 ## Requirements
 - Python 3.9 or later
@@ -51,7 +72,7 @@ python main.py
 3. When you close the simulation window, the file `data/population_data.csv` will be created or updated.
 
 ## Notes
-- `main.py` uses `worlds/world_map_s=1000_r=6_o=10.png` by default. To use a different map, update the `map_path` variable in `main.py`.
+- To use different maps, update the `map_path` variable in `main.py`.
 - Agents cannot move over water or mountain-like areas; they only travel on walkable terrain.
 
 ## Development Ideas
